@@ -5,7 +5,7 @@ import argparse
 import sys
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--url', '-u', metavar='<stooge>', nargs='?', help='Marathon URL')
+parser.add_argument('--url', '-u', metavar='<url>', nargs='?', help='Marathon URL')
 parser.add_argument('--up', action='store_true', help='Scale all up to 1')
 parser.add_argument('--down', action='store_true', help='Scale all down to 0')
 args = parser.parse_args()
