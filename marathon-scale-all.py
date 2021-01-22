@@ -6,6 +6,7 @@ import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--url', '-u', metavar='<url>', nargs='?', help='Marathon URL')
+parser.add_argument('--group', metavar='</group>', nargs='?', help='Group')
 parser.add_argument('--up', action='store_true', help='Scale all up to 1')
 parser.add_argument('--down', action='store_true', help='Scale all down to 0')
 args = parser.parse_args()
@@ -17,16 +18,35 @@ if not args.url:
     parser.print_help(sys.stderr)
     sys.exit('\nMissing Marathon URL')
 
-marathon = str(args.url)+'/v2/apps'
-get_apps = requests.get(marathon)
 if args.up:
-    payload = {'instances': 1}
-    for each_app in get_apps.json()['apps']:
-        requests.put(marathon+each_app['id']+"?force=true", json=payload)
-        print(each_app+' set to 1')
 
+    if args.group:
+        payload = {'instances': 1}
+        marathon = str(args.url)+'/v2/apps'
+        get_apps = requests.get(marathon)
+        for each_app in get_apps.json()['apps']:
+            if args.group in each_app['id']:
+                requests.put(marathon+each_app['id']+"?force=true", json=payload)
+        print(args.group+' set to 1')
+    else:
+        payload = {'instances': 1}
+        marathon = str(args.url)+'/v2/apps'
+        get_apps = requests.get(marathon)
+        for each_app in get_apps.json()['apps']:
+            requests.put(marathon+each_app['id']+"?force=true", json=payload)
+            print(each_app['id']+' set to 1')
+            
 elif args.down:
-    payload = {'instances': 0}
-    for each_app in get_apps.json()['apps']:
-        requests.put(marathon+each_app['id']+"?force=true", json=payload)
-        print(each_app+' set to 0')
+
+    if args.group:
+        payload = {'scaleBy': 0}
+        marathon = str(args.url)+'/v2/groups'
+        requests.put(marathon+args.group+"?force=true", json=payload)
+        print(args.group+' set to 0')
+    else:
+        payload = {'instances': 0}
+        marathon = str(args.url)+'/v2/apps'
+        get_apps = requests.get(marathon)
+        for each_app in get_apps.json()['apps']:
+            requests.put(marathon+each_app['id']+"?force=true", json=payload)
+            print(each_app['id']+' set to 0')
